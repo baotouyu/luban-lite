@@ -40,6 +40,7 @@ endif
 
 menuconfig AIC_USING_EXTERNAL_RTC
     bool "External RTC Driver Option"
+    select RT_USING_RTC if KERNEL_RTTHREAD
 
 if AIC_USING_EXTERNAL_RTC
     source "bsp/peripheral/rtc/Kconfig"

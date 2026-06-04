@@ -22,6 +22,11 @@ struct aic_pinmux aic_pinmux_config[] = {
     {5, PIN_PULL_DIS, 3, "PA.2"},
     {5, PIN_PULL_UP, 3, "PA.3"},
 #endif
+#ifdef AIC_USING_UART2
+    /* uart2 */
+    {5, PIN_PULL_DIS, 3, "PA.4"},  // TX
+    {5, PIN_PULL_UP, 3, "PA.5"},  // RX
+#endif
 #ifdef AIC_USING_CAN0
     /* can0 */
     {4, PIN_PULL_DIS, 3, "PA.4"},
@@ -56,8 +61,8 @@ struct aic_pinmux aic_pinmux_config[] = {
     {4, PIN_PULL_DIS, 3, "PA.9"},  // SDA
 #endif
 #ifdef AIC_USING_I2C1
-    {4, PIN_PULL_DIS, 3, "PA.2"},  // SCK
-    {4, PIN_PULL_DIS, 3, "PA.3"},  // SDA
+    {4, PIN_PULL_DIS, 3, "PD.4"},  // SCK
+    {4, PIN_PULL_DIS, 3, "PD.5"},  // SDA
 #endif
 #ifdef AIC_USING_QSPI0
 #ifndef AIC_SYSCFG_SIP_FLASH_ENABLE
@@ -182,6 +187,30 @@ struct aic_pinmux aic_pinmux_config[] = {
     {2, PIN_PULL_DIS, 3, "PD.25"},
     {2, PIN_PULL_DIS, 3, "PD.26"},
     {2, PIN_PULL_DIS, 3, "PD.27"},
+#endif
+#ifdef AIC_PRGB_18BIT_LD
+    {2, PIN_PULL_DIS, 7, "PD.6"},
+    {2, PIN_PULL_DIS, 7, "PD.7"},
+    {2, PIN_PULL_DIS, 7, "PD.8"},
+    {2, PIN_PULL_DIS, 7, "PD.9"},
+    {2, PIN_PULL_DIS, 7, "PD.10"},
+    {2, PIN_PULL_DIS, 7, "PD.11"},
+    {2, PIN_PULL_DIS, 7, "PD.12"},
+    {2, PIN_PULL_DIS, 7, "PD.13"},
+    {2, PIN_PULL_DIS, 7, "PD.14"},
+    {2, PIN_PULL_DIS, 7, "PD.15"},
+    {2, PIN_PULL_DIS, 7, "PD.16"},
+    {2, PIN_PULL_DIS, 7, "PD.17"},
+    {2, PIN_PULL_DIS, 7, "PD.18"},
+    {2, PIN_PULL_DIS, 7, "PD.19"},
+    {2, PIN_PULL_DIS, 7, "PD.20"},
+    {2, PIN_PULL_DIS, 7, "PD.21"},
+    {2, PIN_PULL_DIS, 7, "PD.22"},
+    {2, PIN_PULL_DIS, 7, "PD.23"},
+    {2, PIN_PULL_DIS, 7, "PD.24"},
+    {2, PIN_PULL_DIS, 7, "PD.25"},
+    {2, PIN_PULL_DIS, 7, "PD.26"},
+    {2, PIN_PULL_DIS, 7, "PD.27"},
 #endif
 #ifdef AIC_SRGB_8BIT
     {2, PIN_PULL_DIS, 3, "PD.16"},

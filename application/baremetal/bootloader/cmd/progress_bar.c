@@ -27,6 +27,7 @@
 #define WIDTH_SPLIT_DENOMINATOR     6
 
 #define BAR_HEIGHT                  32
+#define PROGRESS_TEXT_GAP           5
 
 #define SPLIT_WIDTH(w)              \
     ((w) * WIDTH_SPLIT_NUMERATOR / WIDTH_SPLIT_DENOMINATOR)
@@ -257,6 +258,7 @@ void aicfb_draw_bar(unsigned int value)
 {
     struct aicfb_screeninfo info;
     unsigned int bar_x, bar_y, width, height;
+    unsigned int total_height;
     unsigned int console_x, console_y;
     static bool power_on = false;
 #ifdef AIC_FB_ROTATE_EN
@@ -281,10 +283,11 @@ void aicfb_draw_bar(unsigned int value)
 
     width     = SPLIT_WIDTH(info.width);
     height    = BAR_HEIGHT;
+    total_height = BAR_HEIGHT + PROGRESS_TEXT_GAP + VIDEO_FONT_HEIGHT;
     bar_x     = (info.width - width) / 2;
-    bar_y     = 0;
+    bar_y     = (info.height - total_height) / 2;
     console_x = info.width / 2;
-    console_y = bar_y + BAR_HEIGHT + 5;
+    console_y = bar_y + BAR_HEIGHT + PROGRESS_TEXT_GAP;
 
     if (value == 0) {
 #if defined(AIC_FB_ROTATE_EN) && defined(AIC_GE_NORMAL)

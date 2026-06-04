@@ -14,7 +14,7 @@
     "image": {
         "info": { // Header information about image
             "platform": "d12x",
-            "product": "demo68-nor",
+            "product": "KI-141103-480p",
             "version": "1.0.0",
             "media": {
                 "type": "spi-nor",
