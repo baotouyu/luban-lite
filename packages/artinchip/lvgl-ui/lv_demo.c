@@ -14,6 +14,8 @@
 #include "aic_ui.h"
 #include "aic_time.h"
 
+extern int ep_lubanlite_lvgl_app_ui_create(void) __attribute__((weak));
+
 #ifdef RT_USING_DFS
 #include <dfs_fs.h>
 void lv_wait_fs_mounted(void)
@@ -37,6 +39,11 @@ void lv_wait_fs_mounted(void)
 void lv_user_gui_init(void)
 {
 #if defined(AIC_LVGL_DEMO) && !defined(RT_USING_MODULE)
+    if (ep_lubanlite_lvgl_app_ui_create != 0) {
+        if (ep_lubanlite_lvgl_app_ui_create() == 0)
+            return;
+    }
+
     aic_ui_init();
 #endif
 }
