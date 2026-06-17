@@ -114,14 +114,18 @@
 #endif /* LV_USE_DEMO_MUSIC */
 
 /*FreeType library*/
-#define LV_USE_FREETYPE 0
+#if defined(LPKG_USING_FREETYPE)
+    #define LV_USE_FREETYPE 1
+#else
+    #define LV_USE_FREETYPE 0
+#endif
 #if LV_USE_FREETYPE
     /*Let FreeType to use LVGL memory and file porting*/
     #define LV_FREETYPE_USE_LVGL_PORT 0
 
     /*Cache count of the glyphs in FreeType. It means the number of glyphs that can be cached.
      *The higher the value, the more memory will be used.*/
-    #define LV_FREETYPE_CACHE_FT_GLYPH_CNT 256
+    #define LV_FREETYPE_CACHE_FT_GLYPH_CNT 512
 #endif
 
 #define LV_USE_GIF 1
