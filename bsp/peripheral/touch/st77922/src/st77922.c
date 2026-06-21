@@ -64,31 +64,14 @@ static rt_err_t st77922_read_regs(struct rt_i2c_client *dev, rt_uint8_t *reg,
     }
 }
 
-static rt_err_t st77922_get_info(struct rt_i2c_client *dev,
-                               struct rt_touch_info *info)
+static struct rt_touch_info st77922_info =
 {
-    rt_uint8_t reg[2];
-    rt_uint8_t info_buf[5];
-
-    if (info == RT_NULL)
-        return -RT_EINVAL;
-
-    reg[0] = (rt_uint8_t)(ST77922_MAX_X_COORD >> 8);
-    reg[1] = (rt_uint8_t)(ST77922_MAX_X_COORD & 0xFF);
-
-        if (st77922_read_regs(dev, reg, info_buf, sizeof(info_buf)) != RT_EOK) {
-        rt_kprintf("read info failed!\n");
-        return -RT_ERROR;
-    }
-
-    info->range_x = ((info_buf[0] & 0x3f) << 8 | info_buf[1]);
-    info->range_y = ((info_buf[2] & 0x3f) << 8 | info_buf[3]);
-    info->point_num = info_buf[4];
-    info->type = RT_TOUCH_TYPE_CAPACITANCE;
-    info->vendor = RT_TOUCH_VENDOR_UNKNOWN;
-
-    return RT_EOK;
-}
+    RT_TOUCH_TYPE_CAPACITANCE,
+    RT_TOUCH_VENDOR_UNKNOWN,
+    ST77922_MAX_TOUCH,
+    (rt_int32_t)AIC_TOUCH_X_COORDINATE_RANGE,
+    (rt_int32_t)AIC_TOUCH_Y_COORDINATE_RANGE,
+};
 
 static int16_t pre_x[ST77922_MAX_TOUCH] = { -1, -1, -1, -1, -1 };
 static int16_t pre_y[ST77922_MAX_TOUCH] = { -1, -1, -1, -1, -1 };
@@ -140,8 +123,11 @@ static rt_size_t st77922_read_point(struct rt_touch_device *touch,
 {
     rt_uint8_t point_status = 0;
     rt_uint8_t touch_num = 0;
+    rt_uint8_t report_num = 0;
+    rt_uint8_t event_num = 0;
     rt_uint8_t cmd[2], i, num_valid;
-    rt_uint8_t read_buf[7 * ST77922_MAX_TOUCH + 5] = { 0 };
+    rt_uint8_t read_buf[ST77922_POINT_HEADER_LEN +
+                        ST77922_POINT_INFO_NUM * ST77922_MAX_TOUCH] = { 0 };
     rt_uint8_t read_index;
     rt_uint8_t dev_status;
     rt_uint8_t error_code;
@@ -152,6 +138,13 @@ static rt_size_t st77922_read_point(struct rt_touch_device *touch,
     static rt_uint8_t pre_touch = 0;
     static int8_t pre_id[ST77922_MAX_TOUCH] = { 0 };
 
+    if ((buf == RT_NULL) || (read_num == 0))
+        return 0;
+
+    report_num = read_num > ST77922_MAX_TOUCH ? ST77922_MAX_TOUCH : read_num;
+    if (pre_touch > report_num)
+        pre_touch = report_num;
+
     rt_memset(buf, 0, sizeof(struct rt_touch_data) * read_num);
 
     /* point status register */
@@ -160,21 +153,21 @@ static rt_size_t st77922_read_point(struct rt_touch_device *touch,
 
     if (st77922_read_regs(&st77922_client, cmd, &point_status, 1) != RT_EOK) {
         rt_kprintf("read point status fail\n");
-        read_num = 0;
+        report_num = 0;
         goto __exit;
     }
 
     dev_status = point_status & 0x0f;
     if (dev_status != 0) {
         rt_kprintf("tp status is error, status mode:%d\n", dev_status);
-        read_num = 0;
+        report_num = 0;
         goto __exit;
     }
 
     error_code = (point_status & 0xf0) >> 4;
     if (error_code != 0) {
         rt_kprintf("tp status is error, error code:%d\n", error_code);
-        read_num = 0;
+        report_num = 0;
         goto __exit;
     }
 
@@ -183,19 +176,19 @@ static rt_size_t st77922_read_point(struct rt_touch_device *touch,
     /* read point num is touch_num */
     if (st77922_read_regs(&st77922_client, cmd, read_buf, sizeof(read_buf)) != RT_EOK) {
         rt_kprintf("read point failed\n");
-        read_num = 0;
+        report_num = 0;
         goto __exit;
     }
 
     for (i = 0; i < ST77922_MAX_TOUCH; i++) {
-        num_valid = ((read_buf[7 * i + 4] & 0x80) != 0) ? 1 : 0;
+        rt_uint8_t off_set = ST77922_POINT_HEADER_LEN + ST77922_POINT_INFO_NUM * i;
+
+        num_valid = ((read_buf[off_set] & 0x80) != 0) ? 1 : 0;
         touch_num += num_valid;
     }
 
-    if (touch_num > ST77922_MAX_TOUCH) {
-        touch_num = 0;
-        goto __exit;
-    }
+    if (touch_num > report_num)
+        touch_num = report_num;
 
     for (int8_t i = 0; i < touch_num; i++) {
         id[i] = i;
@@ -207,7 +200,7 @@ static rt_size_t st77922_read_point(struct rt_touch_device *touch,
             rt_uint8_t j;
 
             for (j = 0; j < touch_num; j++) {
-                read_id = id[read_index];
+                read_id = id[j];
 
                 if (pre_id[read_index] == read_id) /* this id is not free */
                     break;
@@ -215,7 +208,11 @@ static rt_size_t st77922_read_point(struct rt_touch_device *touch,
                 if (j >= touch_num - 1) {
                     rt_uint8_t up_id;
                     up_id = pre_id[read_index];
-                    st77922_touch_up(buf, up_id);
+                    if (up_id < report_num) {
+                        st77922_touch_up(buf, up_id);
+                        if (event_num < up_id + 1)
+                            event_num = up_id + 1;
+                    }
                 }
             }
         }
@@ -226,13 +223,18 @@ static rt_size_t st77922_read_point(struct rt_touch_device *touch,
         rt_uint8_t off_set;
 
         for (read_index = 0; read_index < touch_num; read_index++) {
-            off_set = read_index * 7;
+            off_set = ST77922_POINT_HEADER_LEN + read_index * ST77922_POINT_INFO_NUM;
 
             read_id = id[read_index];
             pre_id[read_index] = read_id;
 
-            input_x = ((read_buf[off_set + 4] & 0x3f) << 8) | read_buf[off_set + 5];
-            input_y = ((read_buf[off_set + 6] & 0x3f) << 8) | read_buf[off_set + 7];
+            input_x = ((read_buf[off_set] & 0x3f) << 8) | read_buf[off_set + 1];
+            input_y = ((read_buf[off_set + 2] & 0x3f) << 8) | read_buf[off_set + 3];
+
+            if (input_x >= AIC_TOUCH_X_COORDINATE_RANGE ||
+                input_y >= AIC_TOUCH_Y_COORDINATE_RANGE) {
+                continue;
+            }
 
             aic_touch_flip(&input_x, &input_y);
             aic_touch_rotate(&input_x, &input_y);
@@ -241,23 +243,33 @@ static rt_size_t st77922_read_point(struct rt_touch_device *touch,
                 continue;
 
             st77922_touch_down(buf, read_id, input_x, input_y);
+            if (event_num < read_id + 1)
+                event_num = read_id + 1;
         }
     } else if (pre_touch) {
         for (read_index = 0; read_index < pre_touch; read_index++) {
-            st77922_touch_up(buf, pre_id[read_index]);
+            if (pre_id[read_index] < report_num) {
+                st77922_touch_up(buf, pre_id[read_index]);
+                if (event_num < pre_id[read_index] + 1)
+                    event_num = pre_id[read_index] + 1;
+            }
         }
     }
 
     pre_touch = touch_num;
+    report_num = event_num;
 
 __exit:
-    return read_num;
+    return report_num;
 }
 
 static rt_err_t st77922_control(struct rt_touch_device *touch, int cmd, void *arg)
 {
     if (cmd == RT_TOUCH_CTRL_GET_INFO) {
-        return st77922_get_info(&st77922_client, arg);
+        if (arg == RT_NULL)
+            return -RT_EINVAL;
+
+        rt_memcpy(arg, &touch->info, sizeof(struct rt_touch_info));
     }
 
     return RT_EOK;
@@ -292,6 +304,8 @@ static int st77922_hw_init(const char *name, struct rt_touch_config *cfg)
     }
 
     st77922_client.client_addr = ST77922_SALVE_ADDR;
+
+    touch_device->info = st77922_info;
 
     rt_memcpy(&touch_device->config, cfg, sizeof(struct rt_touch_config));
     touch_device->ops = &st77922_touch_ops;

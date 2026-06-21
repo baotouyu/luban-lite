@@ -18,6 +18,8 @@
 #define ST77922_REGITER_LEN         2
 #define ST77922_SALVE_ADDR          0x55
 #define ST77922_MAX_TOUCH           5
+#define ST77922_POINT_HEADER_LEN    4
+#define ST77922_POINT_INFO_NUM      8
 
 /* ST77922 REGISTER */
 #define ST77922_FW_VERSION          0x0000

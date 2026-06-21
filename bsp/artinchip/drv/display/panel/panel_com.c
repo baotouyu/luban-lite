@@ -52,6 +52,9 @@ static struct aic_panel *panels[] = {
 #ifdef AIC_PANEL_DSI_ST7701S
     &dsi_st7701s,
 #endif
+#ifdef AIC_PANEL_DSI_ST7102
+    &dsi_st7102,
+#endif
 #ifdef AIC_PANEL_DSI_JD9366TC
     &dsi_jd9366tc,
 #endif
@@ -220,9 +223,10 @@ void panel_backlight_enable(struct aic_panel *panel, u32 ms)
     pwm_dev = (struct rt_device_pwm *)rt_device_find("pwm");
 
 #ifndef AIC_PWM_BACKLIGHT_BYPASS
-    /* pwm frequency: 1KHz = 1000000ns */
+    /* Configure period in ns; duty is brightness percent of period. */
     rt_pwm_set(pwm_dev, AIC_PWM_BACKLIGHT_CHANNEL,
-            1000000, 10000 * AIC_PWM_BRIGHTNESS_LEVEL);
+            AIC_PWM_BACKLIGHT_PERIOD_NS,
+            (AIC_PWM_BACKLIGHT_PERIOD_NS / 100) * AIC_PWM_BRIGHTNESS_LEVEL);
 #endif
     rt_pwm_enable(pwm_dev, AIC_PWM_BACKLIGHT_CHANNEL);
 #endif
