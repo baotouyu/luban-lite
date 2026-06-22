@@ -215,6 +215,10 @@ if AIC_PWM_BACKLIGHT
         int "pwm backlight channel"
         default 3
 
+    config AIC_PWM_BACKLIGHT_PERIOD_NS
+        int "pwm backlight period in ns"
+        default 1000000
+
     config AIC_PWM_BRIGHTNESS_LEVEL
         int "default brightness level"
         default 80

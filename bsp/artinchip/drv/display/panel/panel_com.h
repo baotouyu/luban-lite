@@ -36,6 +36,7 @@ extern struct aic_panel dsi_nv3051;
 extern struct aic_panel dsi_fl7707;
 extern struct aic_panel dsi_ft8201;
 extern struct aic_panel dsi_st7701s;
+extern struct aic_panel dsi_st7102;
 extern struct aic_panel dsi_jd9366tc;
 extern struct aic_panel dsi_edp_lt9811exb;
 
@@ -131,4 +132,3 @@ void panel_spi_device_emulation(char *cs, char *sdi, char *scl, char *dc);
 #endif
 
 #endif /* _PANEL_COM_H_ */
-
