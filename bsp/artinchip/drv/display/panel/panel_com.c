@@ -31,6 +31,9 @@ static struct aic_panel *panels[] = {
 #ifdef AIC_PANEL_DSI_ILI9881C
     &dsi_ili9881c,
 #endif
+#ifdef AIC_PANEL_DSI_ILI9883C
+    &dsi_ili9883c,
+#endif
 #ifdef AIC_PANEL_DSI_HX8394
     &dsi_hx8394,
 #endif
@@ -221,6 +224,10 @@ void panel_backlight_enable(struct aic_panel *panel, u32 ms)
     struct rt_device_pwm *pwm_dev;
 
     pwm_dev = (struct rt_device_pwm *)rt_device_find("pwm");
+    if (!pwm_dev) {
+        pr_err("PWM backlight device not found\n");
+        return;
+    }
 
 #ifndef AIC_PWM_BACKLIGHT_BYPASS
     /* Configure period in ns; duty is brightness percent of period. */
@@ -228,6 +235,9 @@ void panel_backlight_enable(struct aic_panel *panel, u32 ms)
             AIC_PWM_BACKLIGHT_PERIOD_NS,
             (AIC_PWM_BACKLIGHT_PERIOD_NS / 100) * AIC_PWM_BRIGHTNESS_LEVEL);
 #endif
+    pr_info("PWM backlight: channel=%d period=%d duty=%d\n",
+            AIC_PWM_BACKLIGHT_CHANNEL, AIC_PWM_BACKLIGHT_PERIOD_NS,
+            (AIC_PWM_BACKLIGHT_PERIOD_NS / 100) * AIC_PWM_BRIGHTNESS_LEVEL);
     rt_pwm_enable(pwm_dev, AIC_PWM_BACKLIGHT_CHANNEL);
 #endif
 }

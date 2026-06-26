@@ -51,6 +51,9 @@ choice
     config AIC_TOUCH_PANEL_ILI2117
         bool "ILI2117"
 
+    config AIC_TOUCH_PANEL_ILITEK
+        bool "ILITEK TDDI"
+
     config AIC_TOUCH_PANEL_JD9366
         bool "JD9366"
 
@@ -204,6 +207,7 @@ config AIC_TOUCH_PANEL_NAME
     default "ili21xx"   if AIC_TOUCH_PANEL_ILI21XX
     default "ili2117"   if AIC_TOUCH_PANEL_ILI2117
     default "ili23xx"   if AIC_TOUCH_PANEL_ILI23XX
+    default "ilitek"    if AIC_TOUCH_PANEL_ILITEK
     default "jd9366"    if AIC_TOUCH_PANEL_JD9366
     default "st16xx"    if AIC_TOUCH_PANEL_ST16XX
     default "st77922"   if AIC_TOUCH_PANEL_ST77922

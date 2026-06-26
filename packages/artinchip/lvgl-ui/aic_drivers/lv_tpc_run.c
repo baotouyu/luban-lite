@@ -127,7 +127,11 @@ int tpc_run(const char *name, rt_uint16_t x, rt_uint16_t y)
 #ifdef AIC_LVGL_USB_OSD_DEMO
     rt_device_close(dev);
 #endif
+#ifdef AIC_CTP_POLLING_MODE
+    if (rt_device_open(dev, RT_DEVICE_FLAG_RDWR) != RT_EOK)
+#else
     if (rt_device_open(dev, RT_DEVICE_FLAG_INT_RX) != RT_EOK)
+#endif
     {
         rt_kprintf("Failed to open dev %s\n", name);
         return -1;

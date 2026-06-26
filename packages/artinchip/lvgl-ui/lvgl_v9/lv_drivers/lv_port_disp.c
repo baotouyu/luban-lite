@@ -232,6 +232,8 @@ static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_ma
             display_power_on(aic_disp);
             // wait vsync
             mpp_fb_ioctl(aic_disp->fb, AICFB_WAIT_FOR_VSYNC, 0);
+#else
+            display_power_on(aic_disp);
 #endif
         }
 

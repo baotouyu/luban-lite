@@ -232,6 +232,11 @@ static int aic_dsi_attach_panel(struct aic_panel *panel, struct panel_desc *desc
     else
         comp->dc_inv = CLK_INVERSE;
 
+    pr_info("DSI attach: pclk=%u sclk=%lu lanes=%u mode=%u fmt=%u ln_assign=0x%x ln_polrs=0x%x dc_inv=%u\n",
+            comp->pixclk, (unsigned long)comp->sclk_rate, dsi->lane_num,
+            dsi->mode, dsi->format, comp->ln_assign, comp->ln_polrs,
+            comp->dc_inv);
+
     aic_dsi_release_drvdata();
     return 0;
 }
@@ -384,4 +389,3 @@ struct platform_driver artinchip_dsi_driver = {
     .remove = aic_dsi_remove,
     .di_funcs = &aic_dsi_func,
 };
-
