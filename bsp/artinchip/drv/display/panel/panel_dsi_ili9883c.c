@@ -312,14 +312,15 @@ static struct aic_panel_funcs panel_funcs = {
 };
 
 static struct display_timing ili9883c_timing = {
-    .pixelclock = 75000000,
+    /* UE059HD-AK40-A003 output timing: 720x1440@60Hz, PCLK 72MHz. */
+    .pixelclock = 72000000,
     .hactive = 720,
-    .hfront_porch = 40,
-    .hback_porch = 40,
-    .hsync_len = 12,
+    .hfront_porch = 26,
+    .hback_porch = 26,
+    .hsync_len = 8,
     .vactive = 1440,
     .vfront_porch = 50,
-    .vback_porch = 44,
+    .vback_porch = 40,
     .vsync_len = 4,
 };
 

@@ -19,7 +19,7 @@ static rt_int16_t last_x = 0;
 static rt_int16_t last_y = 0;
 static lv_indev_t *indev_touchpad;
 static rt_int16_t touch_cal_dx;
-static rt_int16_t touch_cal_dy = 45;
+static rt_int16_t touch_cal_dy;
 static rt_uint16_t touch_cal_log_left;
 
 static void touch_apply_display_offset(rt_int16_t *x, rt_int16_t *y)
